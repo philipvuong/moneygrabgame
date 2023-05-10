@@ -5,17 +5,16 @@
     <style>
       #container {
         position: relative;
-        width: 400px;
-        height: 400px;
+        height: 700px;
         margin: 0 auto;
-        border: 1px solid black;
+        /* border: 1px solid black; */
         overflow: hidden;
       }
       .money {
         animation: fall linear infinite;
         animation-duration: 2s;
         animation-delay: 0s;
-        font-size: 25px;
+        font-size: 50px;
         position: absolute;
       }
       @keyframes fall {
@@ -23,29 +22,91 @@
           top: -50px;
         }
         to {
-          top: 400px;
+          top: 700px;
         }
       }
       #sack {
         cursor: pointer;
         touch-action: manipulation;
-        font-size: 75px;
+        font-size: 150px;
         bottom: 0px;
         left: 0px;
         position: absolute;
       }
+
+      #startButton {
+        position: absolute;
+        font-size: 75px;
+        top: 250px;
+        left: 250px;
+      }
+
+      #logo {
+        height: 125px;
+      }
+
+      #underlogo {
+        color: #74758c;
+        font-size: 24px;
+        line-height: 17px;
+        font-weight: inherit;
+        word-break: break-word;
+        padding-left: 30px;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      #timer {
+        font-size: 48px;
+        text-align: center;
+      }
+
+      #score {
+        font-size: 48px;
+        text-align: center;
+      }
+
+      #checkout {
+        font-size: 64px;
+        left: 232px;
+        position: absolute;
+        background-color: #1ec677;
+        padding: 35px;
+        color: white;
+      }
     </style>
   </head>
-  <body>
-    <button id="startButton">Start Game</button>
+  <body scroll="no" style="overflow: hidden">
+    <div>
+      <img id="logo" src="./chime.png" alt="Chime Logo" />
+      <br />
+      <span id="underlogo">A better way to pay anyone</span>
+      <br />
+      <br />
+      <br />
+    </div>
     <div id="container">
+      <button id="startButton">Start Game</button>
+
       <div id="sack"></div>
     </div>
     <div id="score"></div>
-    <div id="timer">Time: 10</div>
+    <div id="timer">
+      Money to Collect:
+      <span style="font-weight: bold; font-size: 72px; verticle-align: sub"
+        >$50</span
+      >
+    </div>
 
     <script>
       var sack = document.getElementById("sack");
+      var startBtn = document.getElementById("startButton");
       sack.innerHTML = "💰";
       var score = 0;
       var timeLeft = 10;
@@ -103,7 +164,8 @@
         var moneyType = Math.random() < 0.8 ? "💸" : tax;
         money.innerHTML = moneyType;
         money.style.left =
-          Math.floor(Math.random() * (400 - money.offsetWidth)) + "px";
+          Math.floor(Math.random() * (window.innerWidth - money.offsetWidth)) +
+          "px";
         document.getElementById("container").appendChild(money);
 
         setInterval(function () {
@@ -114,7 +176,7 @@
             moneyRect.bottom >= sackRect.top &&
             moneyRect.left >= sackRect.left &&
             moneyRect.right <= sackRect.right &&
-            timeLeft > 0
+            score < 10 // TODO: Change to 50
           ) {
             if (moneyType === "💸") {
               score++;
@@ -123,9 +185,14 @@
               score--;
               moneyDropped++;
             }
-            document.getElementById("score").innerHTML = "Score: " + score;
+            document.getElementById("score").innerHTML =
+              "Score: $" + score + " / $50";
             money.remove();
-          } else if (moneyRect.bottom >= 400) {
+            if (score == 10) {
+              // TODO: Score = 50
+              endGame();
+            }
+          } else if (moneyRect.bottom >= 700) {
             if (moneyType === "💸") {
               moneyDropped++;
             }
@@ -136,8 +203,9 @@
 
       // Start the game timer
       function startTimer() {
+        startBtn.style.display = "none";
         timerInterval = setInterval(function () {
-          timeLeft--;
+          timeLeft++;
           document.getElementById("timer").innerHTML = "Time: " + timeLeft;
 
           if (timeLeft == 0) {
@@ -151,13 +219,9 @@
         clearInterval(timerInterval);
         clearInterval(moneyDropInterval);
         document.getElementById("container").innerHTML =
-          "<h1>Game Over!</h1><p>Your score is: " +
-          score +
-          "</p><p>Money caught: " +
-          moneyCaught +
-          "</p><p>Money dropped: " +
-          moneyDropped +
-          "</p>";
+          "<h1 style='font-size:75px;text-align:center'>Game Over!</h1><p style='font-size:50px;text-align:center'>Nice work collecting those bills" +
+          "</p>" +
+          "<button id='checkout'>Redeem your 💸</button>";
       }
 
       // Start the game on button click
@@ -165,6 +229,8 @@
         .getElementById("startButton")
         .addEventListener("click", function () {
           sack.style.bottom = "0px";
+          document.getElementById("score").innerHTML =
+            "Score: $" + 0 + " / $50";
           startTimer();
           moneyDropInterval = setInterval(function () {
             createMoney();
