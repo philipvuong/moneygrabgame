@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Catcher Game</title>
+    <style>
+      #container {
+        position: relative;
+        width: 400px;
+        height: 400px;
+        margin: 0 auto;
+        border: 1px solid black;
+        overflow: hidden;
+      }
+      .money {
+        animation: fall linear infinite;
+        animation-duration: 2s;
+        animation-delay: 0s;
+        font-size: 25px;
+        position: absolute;
+      }
+      @keyframes fall {
+        from {
+          top: -50px;
+        }
+        to {
+          top: 400px;
+        }
+      }
+      #sack {
+        cursor: pointer;
+        touch-action: manipulation;
+        font-size: 75px;
+        bottom: 0px;
+        left: 0px;
+        position: absolute;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="startButton">Start Game</button>
+    <div id="container">
+      <div id="sack"></div>
+    </div>
+    <div id="score"></div>
+    <div id="timer">Time: 10</div>
+
+    <script>
+      var sack = document.getElementById("sack");
+      sack.innerHTML = "💰";
+      var score = 0;
+      var timeLeft = 10;
+      var timerInterval;
+      var moneyDropInterval;
+      var isDragging = false;
+      var moneyCaught = 0;
+      var moneyDropped = 0;
+
+      // Move the sack with touch or click
+      sack.addEventListener("mousedown", startDrag);
+      sack.addEventListener("touchstart", startDrag);
+      document.addEventListener("mousemove", dragSack);
+      document.addEventListener("touchmove", dragSack);
+      document.addEventListener("mouseup", endDrag);
+      document.addEventListener("touchend", endDrag);
+
+      function drag(e) {
+        if (isDragging) {
+          var x = e.clientX - offsetX;
+          var y = e.clientY - offsetY;
+          sack.style.left = x + "px";
+          sack.style.top = y + "px";
+        }
+      }
+
+      function startDrag(e) {
+        if (e.target === sack) {
+          isDragging = true;
+          var rect = sack.getBoundingClientRect();
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+        }
+      }
+
+      function dragSack(e) {
+        if (isDragging) {
+          var x = e.pageX || e.touches[0].pageX;
+          sack.style.left = x - sack.offsetWidth / 2 + "px";
+        }
+      }
+
+      function endDrag(e) {
+        if (e.target !== sack) {
+          isDragging = false;
+        }
+      }
+
+      // Generate a random money drop
+      function createMoney() {
+        var money = document.createElement("div");
+        var tax =
+          "<span style='font-weight:bold;background-color:black;color:white;padding:5px;'>TAX</span>";
+        money.classList.add("money");
+        var moneyType = Math.random() < 0.8 ? "💸" : tax;
+        money.innerHTML = moneyType;
+        money.style.left =
+          Math.floor(Math.random() * (400 - money.offsetWidth)) + "px";
+        document.getElementById("container").appendChild(money);
+
+        setInterval(function () {
+          var moneyRect = money.getBoundingClientRect();
+          var sackRect = sack.getBoundingClientRect();
+
+          if (
+            moneyRect.bottom >= sackRect.top &&
+            moneyRect.left >= sackRect.left &&
+            moneyRect.right <= sackRect.right &&
+            timeLeft > 0
+          ) {
+            if (moneyType === "💸") {
+              score++;
+              moneyCaught++;
+            } else if (moneyType === tax) {
+              score--;
+              moneyDropped++;
+            }
+            document.getElementById("score").innerHTML = "Score: " + score;
+            money.remove();
+          } else if (moneyRect.bottom >= 400) {
+            if (moneyType === "💸") {
+              moneyDropped++;
+            }
+            money.remove();
+          }
+        }, 100);
+      }
+
+      // Start the game timer
+      function startTimer() {
+        timerInterval = setInterval(function () {
+          timeLeft--;
+          document.getElementById("timer").innerHTML = "Time: " + timeLeft;
+
+          if (timeLeft == 0) {
+            endGame();
+          }
+        }, 1000);
+      }
+
+      // End the game
+      function endGame() {
+        clearInterval(timerInterval);
+        clearInterval(moneyDropInterval);
+        document.getElementById("container").innerHTML =
+          "<h1>Game Over!</h1><p>Your score is: " +
+          score +
+          "</p><p>Money caught: " +
+          moneyCaught +
+          "</p><p>Money dropped: " +
+          moneyDropped +
+          "</p>";
+      }
+
+      // Start the game on button click
+      document
+        .getElementById("startButton")
+        .addEventListener("click", function () {
+          sack.style.bottom = "0px";
+          startTimer();
+          moneyDropInterval = setInterval(function () {
+            createMoney();
+          }, 250);
+        });
+    </script>
+  </body>
+</html>
