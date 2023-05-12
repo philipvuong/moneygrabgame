@@ -5,7 +5,7 @@
     <style>
       #container {
         position: relative;
-        height: 700px;
+        height: 900px;
         margin: 0 auto;
         /* border: 1px solid black; */
         overflow: hidden;
@@ -22,7 +22,7 @@
           top: -50px;
         }
         to {
-          top: 700px;
+          top: 900px;
         }
       }
       #sack {
@@ -30,15 +30,33 @@
         touch-action: manipulation;
         font-size: 150px;
         bottom: 0px;
-        left: 0px;
+        left: 425px;
         position: absolute;
       }
 
       #startButton {
+        display: block;
+        min-width: 80px;
+        width: 50%;
+        height: 10rem;
+        font-size: 3rem;
+        font-weight: 700;
+        border-radius: 1.5rem;
+        box-shadow: none;
+        -webkit-transition: all 0.3s ease 0s;
+        transition: all 0.3s ease 0s;
+        padding: 0.75rem 1rem;
+        color: #333333;
+        background-color: #2de38e;
+        border: none;
+        cursor: pointer;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        text-align: center;
+        box-sizing: border-box;
         position: absolute;
-        font-size: 75px;
-        top: 250px;
-        left: 250px;
+        left: 230px;
+        top: 300px;
       }
 
       #logo {
@@ -60,25 +78,57 @@
         margin: 0;
         padding: 0;
         overflow: hidden;
+        font-family: "Circular Pro,sans-serif";
       }
 
       #timer {
         font-size: 48px;
         text-align: center;
+        color: #333333;
       }
 
       #score {
         font-size: 48px;
         text-align: center;
+        color: #333333;
       }
 
       #checkout {
-        font-size: 64px;
-        left: 232px;
+        display: block;
+        min-width: 80px;
+        width: 50%;
+        height: 10rem;
+        font-size: 3rem;
+        font-weight: 700;
+        border-radius: 1.5rem;
+        box-shadow: none;
+        -webkit-transition: all 0.3s ease 0s;
+        transition: all 0.3s ease 0s;
+        padding: 0.75rem 1rem;
+        color: #333333;
+        background-color: #2de38e;
+        border: none;
+        cursor: pointer;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        text-align: center;
+        box-sizing: border-box;
         position: absolute;
-        background-color: #1ec677;
-        padding: 35px;
-        color: white;
+        left: 230px;
+        top: 350px;
+      }
+
+      #pvli {
+        font-size: 28px;
+        color: #74758c;
+        line-height: 32px;
+      }
+
+      #pvul {
+        padding-left: 75px;
+        font-size: 50px;
+        line-height: 70px;
+        color: #74758c;
       }
     </style>
   </head>
@@ -92,6 +142,18 @@
       <br />
     </div>
     <div id="container">
+      <ul id="pvul">
+        Rules:
+        <li id="pvli">Drag the sack around to collect the falling bills</li>
+        <li id="pvli">
+          Keep collecting the bills until you have reached your Payment amount
+        </li>
+        <li id="pvli">
+          Avoid paying more taxes than you need to! These take away your
+          earnings
+        </li>
+        <li id="pvli">Press 'Start Game' when you are ready</li>
+      </ul>
       <button id="startButton">Start Game</button>
 
       <div id="sack"></div>
@@ -100,7 +162,7 @@
     <div id="timer">
       Money to Collect:
       <span style="font-weight: bold; font-size: 72px; verticle-align: sub"
-        >$50</span
+        >$25</span
       >
     </div>
 
@@ -109,7 +171,7 @@
       var startBtn = document.getElementById("startButton");
       sack.innerHTML = "💰";
       var score = 0;
-      var timeLeft = 10;
+      var timeLeft = 0;
       var timerInterval;
       var moneyDropInterval;
       var isDragging = false;
@@ -123,15 +185,6 @@
       document.addEventListener("touchmove", dragSack);
       document.addEventListener("mouseup", endDrag);
       document.addEventListener("touchend", endDrag);
-
-      function drag(e) {
-        if (isDragging) {
-          var x = e.clientX - offsetX;
-          var y = e.clientY - offsetY;
-          sack.style.left = x + "px";
-          sack.style.top = y + "px";
-        }
-      }
 
       function startDrag(e) {
         if (e.target === sack) {
@@ -176,7 +229,7 @@
             moneyRect.bottom >= sackRect.top &&
             moneyRect.left >= sackRect.left &&
             moneyRect.right <= sackRect.right &&
-            score < 10 // TODO: Change to 50
+            score < 25 // TODO: Change to 50
           ) {
             if (moneyType === "💸") {
               score++;
@@ -186,13 +239,13 @@
               moneyDropped++;
             }
             document.getElementById("score").innerHTML =
-              "Score: $" + score + " / $50";
+              "Score: $" + score + " / $25";
             money.remove();
-            if (score == 10) {
+            if (score == 25) {
               // TODO: Score = 50
               endGame();
             }
-          } else if (moneyRect.bottom >= 700) {
+          } else if (moneyRect.bottom >= 900) {
             if (moneyType === "💸") {
               moneyDropped++;
             }
@@ -204,6 +257,8 @@
       // Start the game timer
       function startTimer() {
         startBtn.style.display = "none";
+        document.getElementById("pvli").style.display = "none";
+        document.getElementById("pvul").style.display = "none";
         timerInterval = setInterval(function () {
           timeLeft++;
           document.getElementById("timer").innerHTML = "Time: " + timeLeft;
@@ -219,7 +274,7 @@
         clearInterval(timerInterval);
         clearInterval(moneyDropInterval);
         document.getElementById("container").innerHTML =
-          "<h1 style='font-size:75px;text-align:center'>Game Over!</h1><p style='font-size:50px;text-align:center'>Nice work collecting those bills" +
+          "<h1 style='font-size:75px;text-align:center;color:#333333;'>Game Over!</h1><p style='font-size:50px;text-align:center;color:#333333;'>Nice work collecting those bills" +
           "</p>" +
           "<button id='checkout'>Redeem your 💸</button>";
       }
@@ -230,7 +285,7 @@
         .addEventListener("click", function () {
           sack.style.bottom = "0px";
           document.getElementById("score").innerHTML =
-            "Score: $" + 0 + " / $50";
+            "Score: $" + 0 + " / $25";
           startTimer();
           moneyDropInterval = setInterval(function () {
             createMoney();
